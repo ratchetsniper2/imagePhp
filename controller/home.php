@@ -1,7 +1,11 @@
 <?php
 
 class Home {
-		
+
+	/**
+	 * Action par defaut
+	 * Afficher la page "home"
+	 */
 	public function indexAction(){
 		$data["view"] = "homeView.php";
 		
@@ -9,9 +13,12 @@ class Home {
 		$data["menu"]['A propos'] = "index.php?controller=home&action=aproposAction";
 		$data["menu"]['Voir photos'] = "index.php?controller=photo&action=indexAction";
 		
-		require_once ("view/mainView.php");
+		require_once("view/mainView.php");
 	}
 	
+	/**
+	 * Afficher la page "a propos"
+	 */
 	public function aproposAction(){
 		$data["view"] = "aproposView.php";
 		
@@ -19,7 +26,7 @@ class Home {
 		$data["menu"]['A propos'] = "index.php?controller=home&action=aproposAction";
 		$data["menu"]['Voir photos'] = "index.php?controller=photo&action=indexAction";
 		
-		require_once ("view/mainView.php");
+		require_once("view/mainView.php");
 	}
 	
 }
