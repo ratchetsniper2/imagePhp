@@ -10,31 +10,13 @@ class Photo {
 	public function Photo(){
 		$this->imgDAO = new ImageDAO();
 	}
-		
-	public function indexAction(){
-		$this->firstAction();
-	}
 	
-	public function firstAction(){
-		$view = "photoView.php";
-		
-		# Mise en place du menu
-		$menu['Home'] = "index.php";
-		$menu['A propos'] = "index.php?controller=home&action=aproposAction";
-
-		$img = $this->imgDAO->getFirstImage();
-		$imgUrl = $img->getURL();
-		
-		require_once ("view/mainView.php");
-	}
-	
-	public function nextAction(){
-		$view = "photoView.php";
-		
-		# Mise en place du menu
-		$menu['Home'] = "index.php";
-		$menu['A propos'] = "index.php?controller=home&action=aproposAction";
-
+	/**
+	 * 
+	 * 
+	 * @return array
+	 */
+	private function getData() : array{
 		if (isset($_GET["imgId"])) {
 			$imgId = $_GET["imgId"];
 			$img = $this->imgDAO->getImage($imgId);
@@ -44,8 +26,45 @@ class Photo {
 			$imgId = $img->getId();
 		}
 		
-		$imgUrl = $img->getURL();
+		$data["imgUrl"] = $img->getURL();
+		$data["imgId"] = $img->getId();
+		$data["imgComment"] = $img->getComment();
+		$data["imgCategory"] = $img->getCategory();
 		
+		if (isset($_GET["size"])) {
+			$imgSize = $_GET["size"];
+		} else {
+			$imgSize = 480;
+		}
+		$data["imgSize"] = $imgSize;
+		
+		$data["prevImgId"] = $this->imgDAO->getPrevImage($img)->getId();
+		$data["nextImgId"] = $this->imgDAO->getNextImage($img)->getId();
+		
+		// menu
+		$data["menu"]['Home'] = "index.php";
+		$data["menu"]['A propos'] = "index.php?controller=home&action=aproposAction";
+		
+		return $data;
+	}
+		
+	public function indexAction(){
+		$this->firstAction();
+	}
+	
+	public function firstAction(){
+		$data = $this->getData();
+		
+		$data["view"] = "photoView.php";
+		
+		require_once ("view/mainView.php");
+	}
+	
+	public function nextAction(){
+		$data = $this->getData();
+		
+		$data["view"] = "photoView.php";
+
 		require_once ("view/mainView.php");
 	}
 	

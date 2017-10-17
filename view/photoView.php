@@ -1,11 +1,11 @@
 <p>
-	<a href=\"viewPhoto.php?imgId=$newImgId&size=$size\">Prev</a>
-	<a href=\"viewPhoto.php?imgId=$newImgId&size=$size\">Next</a>
+	<a href="index.php?controller=photo&action=nextAction&imgId=<?= $data["prevImgId"] ?>&size=<?= $data["imgSize"] ?>">Prev</a>
+	<a href="index.php?controller=photo&action=nextAction&imgId=<?= $data["nextImgId"] ?>&size=<?= $data["imgSize"] ?>">Next</a>
 </p>
 
-<p>Category : $category</p>
-	<a href=\"zoom.php?zoom=1.25&imgId=$imgId&size=$size\">
-	<img src="<?= $imgUrl ?>" width="<?= $imgSize ?>">
+<p>Category : <?= $data["imgCategory"] ?></p>
+	<a href="index.php?controller=photo&action=nextAction&zoom=1.25&imgId=<?= $data["imgId"] ?>&size=<?= $data["imgSize"] ?>">
+	<img src="<?= $data["imgUrl"] ?>" width="<?= $data["imgSize"] ?>">
 </a>
 
-<p>Comment : $comment</p>
+<p>Comment : <?= $data["imgComment"] ?></p>

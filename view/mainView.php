@@ -18,7 +18,7 @@
 			<ul>
 				<?php 
 					# Mise en place du menu par un parcours de la table associative
-					foreach ($menu as $item => $act) {
+					foreach ($data["menu"] as $item => $act) {
 				?>
 				<li><a href="<?= $act ?>"><?= $item ?></a></li>
 				<?php
@@ -28,7 +28,7 @@
 		</div>
 		
 		<div id="corps">
-			<?php require_once $view; ?>
+			<?php require_once $data["view"]; ?>
 		</div>
 		
 		<div id="pied_de_page">
