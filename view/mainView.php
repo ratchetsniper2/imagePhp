@@ -20,7 +20,7 @@
 					# Mise en place du menu par un parcours de la table associative
 					foreach ($data["menu"] as $item => $act) {
 				?>
-				<li><a href="<?= $act ?>"><?= $item ?></a></li>
+				<li class="list-group-item"><a href="<?= $act ?>"><?= $item ?></a></li>
 				<?php
 					}
 				?>
