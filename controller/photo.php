@@ -26,6 +26,8 @@ class Photo {
 			$imgId = $img->getId();
 		}
 		
+		$data = [];
+		
 		$data["imgUrl"] = $img->getURL();
 		$data["imgId"] = $img->getId();
 		$data["imgComment"] = $img->getComment();
