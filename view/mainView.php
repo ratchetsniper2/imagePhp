@@ -19,12 +19,12 @@
 
 		<nav class="col-md-3">
 			<h3>Menu</h3>
-			<ul class="list-group">
+			<div class="list-group">
 				<?php
 				# Mise en place du menu par un parcours de la table associative
 				foreach ($data["menu"] as $item => $act) {
 					?>
-					<li class="list-group-item"><a href="<?= $act ?>"><?= $item ?></a></li>
+					<a class="list-group-item" href="<?= $act ?>"><?= $item ?></a>
 					<?php
 				}
 				?>
