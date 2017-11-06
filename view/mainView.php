@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="view/lib/font-awesome/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="view/style.css" media="screen" title="Normal" />
 	<script src="view/lib/jquery.min.js" charset="utf-8"></script>
+	<script src="view/lib/jquery.matchheight.min.js" charset="utf-8"></script>
 	<script src="view/lib/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
 </head>
 

@@ -40,8 +40,8 @@ class PhotoMatrix {
 
 		$data["menu"]['Home'] = "index.php";
 		$data["menu"]['A propos'] = "index.php?controller=home&action=aproposAction";
-		$data["menu"]['First'] = "index.php?controller=photoMatrix&action=firstAction";
-		$data["menu"]['Random'] = "index.php?controller=photoMatrix&action=randomAction&imgId=$imgId";
+		$data["menu"]['First'] = "index.php?controller=photoMatrix&action=firstAction&nbImg=$nbImg";
+		$data["menu"]['Random'] = "index.php?controller=photoMatrix&action=randomAction&nbImg=$nbImg";
 		$data["menu"]['More'] = "index.php?controller=photoMatrix&imgId=$imgId&nbImg=$nbImgBis";
 		$data["menu"]['Less'] = "index.php?controller=photoMatrix&imgId=$imgId&nbImg=$nbImgTer";
 
@@ -60,6 +60,42 @@ class PhotoMatrix {
 			// Pas d'image, se positionne sur la première
 			$img = $this->imgDAO->getFirstImage();
 		}
+
+		if (isset($_GET["nbImg"]) && is_numeric($_GET["nbImg"])) {
+			$nbImg = $_GET["nbImg"];
+		} else {
+			$nbImg = 2;
+		}
+
+		$imgs = $this->imgDAO->getImageList($img, $nbImg);
+
+
+		$data = $this->getData($imgs, $nbImg);
+		$data["view"] = "photoMatrixView.php";
+
+		require_once("view/mainView.php");
+	}
+
+	public function RandomAction() {
+			$img = $this->imgDAO->getRandomImage();
+
+		if (isset($_GET["nbImg"]) && is_numeric($_GET["nbImg"])) {
+			$nbImg = $_GET["nbImg"];
+		} else {
+			$nbImg = 2;
+		}
+
+		$imgs = $this->imgDAO->getImageList($img, $nbImg);
+
+
+		$data = $this->getData($imgs, $nbImg);
+		$data["view"] = "photoMatrixView.php";
+
+		require_once("view/mainView.php");
+	}
+
+	public function firstAction() {
+			$img = $this->imgDAO->getFirstImage();
 
 		if (isset($_GET["nbImg"]) && is_numeric($_GET["nbImg"])) {
 			$nbImg = $_GET["nbImg"];
