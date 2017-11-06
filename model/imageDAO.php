@@ -6,16 +6,17 @@ class ImageDAO {
 
 	// Chemin où se trouvent les images (par rapport à index.php)
 	const URL_PATH = "model/IMG";
-	
+
 	private $db;
 
 	public function __construct() {
 		try {
-			$serverName = 'localhost'; // Data source name
-			$user = 'root'; // Utilisateur
-			$pass = ''; // Mot de passe
+			$serverName = 'localhost'; // host name
+			$dbName = 'image'; // bdd name
+			$user = 'root'; // utilisateur
+			$pass = 'root'; // mot de passe
 
-			$this->db = new PDO("mysql:host=$serverName;dbname=image", $user, $pass);
+			$this->db = new PDO("mysql:host=$serverName;dbname=$dbName", $user, $pass);
 			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		} catch (PDOException $e) {
 			die ("Erreur : ".$e->getMessage());
@@ -24,7 +25,7 @@ class ImageDAO {
 
 	/**
 	 * Retourne le nombre d'images référencées dans le DAO
-	 * 
+	 *
 	 * @return int
 	 */
 	public function size() : int {
@@ -33,10 +34,10 @@ class ImageDAO {
 
 	/**
 	 * Retourne un objet image correspondant à l'identifiant
-	 * 
+	 *
 	 * @param int $imgId
-	 * 
-	 * @return Image 
+	 *
+	 * @return Image
 	 */
 	public function getImage(int $imgId) : Image{
 		# Verifie que cet identifiant est correct
@@ -62,9 +63,9 @@ class ImageDAO {
 
 	/**
 	 * Retourne une image au hazard
-	 * 
+	 *
 	 * @param string $category La categorie des images à afficher
-	 * 
+	 *
 	 * @return Image
 	 */
 	public function getRandomImage(string $category = null) : Image {
@@ -72,7 +73,7 @@ class ImageDAO {
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category');
 			$s->execute(array("category" => $category));
 			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
-			
+
 			return $this->getImage($ids[random_int(0, count($ids) - 1)]);
 		}else{
 			return $this->getImage(random_int(1, $this->size()));
@@ -81,9 +82,9 @@ class ImageDAO {
 
 	/**
 	 * Retourne l'objet de la premiere image
-	 * 
+	 *
 	 * @param string $category La catégorie de l'image à afficher
-	 * 
+	 *
 	 * @return Image
 	 */
 	public function getFirstImage(string $category = null) : Image {
@@ -99,10 +100,10 @@ class ImageDAO {
 
 	/**
 	 * Retourne l'image suivante d'une image
-	 * 
+	 *
 	 * @param Image $img
 	 * @param string $category La categorie des images à afficher
-	 * 
+	 *
 	 * @return Image
 	 */
 	public function getNextImage(Image $img, string $category = null) : Image {
@@ -110,7 +111,7 @@ class ImageDAO {
 		if ($category != null){
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category AND id > :id LIMIT 1');
 			$s->execute(array("id" => $id, "category" => $category));
-						
+
 			$resultId = $s->fetch(PDO::FETCH_COLUMN);
 			if ($resultId != null){
 				$id = $resultId;
@@ -120,16 +121,16 @@ class ImageDAO {
 				$id += 1;
 			}
 		}
-		
+
 		return $this->getImage($id);
 	}
 
 	/**
 	 * Retourne l'image précédente d'une image
-	 * 
+	 *
 	 * @param Image $img
 	 * @param string $category La categorie des images à afficher
-	 * 
+	 *
 	 * @return \Image
 	 */
 	public function getPrevImage(Image $img, string $category = null) : Image {
@@ -153,11 +154,11 @@ class ImageDAO {
 	/**
 	 * Saute en avant ou en arrière de $nb images
 	 * Retourne la nouvelle image
-	 * 
+	 *
 	 * @param Image $img
 	 * @param int $nb
 	 * @param string $category La categorie des images à afficher
-	 * 
+	 *
 	 * @return Image
 	 */
 	public function jumpToImage(Image $img, int $nb, string $category = null) : Image {
@@ -166,9 +167,9 @@ class ImageDAO {
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category');
 			$s->execute(array("category" => $category));
 			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
-			
+
 			$newPos = array_search($id, $ids) + $nb;
-			
+
 			if ($newPos < 0){
 				$newPos = 0;
 			}else if (!key_exists($newPos, $ids)){
@@ -184,17 +185,17 @@ class ImageDAO {
 				$id = $this->size();
 			}
 		}
-		
+
 		return $this->getImage($id);
 	}
 
 	/**
 	 * Retourne la liste des images consécutives à partir d'une image
-	 * 
+	 *
 	 * @param image $img
 	 * @param int $nb
 	 * @param string $category La categorie des images à afficher
-	 * 
+	 *
 	 * @return array
 	 */
 	public function getImageList(Image $img, int $nb, string $category = null) : array {
@@ -203,10 +204,10 @@ class ImageDAO {
 			debug_print_backtrace();
 			trigger_error("Erreur dans ImageDAO.getImageList: nombre d'images nul");
 		}
-		
+
 		$id = $img->getId();
 		$res = [];
-		
+
 		if ($category != null){
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category AND id >= :id');
 			$s->execute(array("category" => $category, "id" => $id));
@@ -222,10 +223,10 @@ class ImageDAO {
 				$id++;
 			}
 		}
-		
+
 		return $res;
 	}
-	
+
 	/**
 	 * Sauvegarde ou met à jour une image
 	 * 
@@ -248,7 +249,7 @@ class ImageDAO {
 	
 	/**
 	 * Retourne la liste des catégories disponiblent
-	 * 
+	 *
 	 * @return array
 	 */
 	public function getCategorieList() : array{
