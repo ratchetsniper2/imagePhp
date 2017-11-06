@@ -33,12 +33,17 @@ class PhotoMatrix {
 		$imgId = $imgs[array_keys($imgs)[0]]->getId();
 
 		$nbImgBis = $nbImg*2;
+		$nbImgTer = $nbImg/2;
+		if ($nbImgTer < 1) {
+			$nbImgTer = 1;
+		}
 
 		$data["menu"]['Home'] = "index.php";
 		$data["menu"]['A propos'] = "index.php?controller=home&action=aproposAction";
 		$data["menu"]['First'] = "index.php?controller=photoMatrix&action=firstAction";
 		$data["menu"]['Random'] = "index.php?controller=photoMatrix&action=randomAction&imgId=$imgId";
 		$data["menu"]['More'] = "index.php?controller=photoMatrix&imgId=$imgId&nbImg=$nbImgBis";
+		$data["menu"]['Less'] = "index.php?controller=photoMatrix&imgId=$imgId&nbImg=$nbImgTer";
 
 		return $data;
 	}
