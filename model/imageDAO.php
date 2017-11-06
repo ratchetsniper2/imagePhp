@@ -63,49 +63,91 @@ class ImageDAO {
 	/**
 	 * Retourne une image au hazard
 	 * 
+	 * @param string $category La categorie des images à afficher
+	 * 
 	 * @return Image
 	 */
-	public function getRandomImage() : Image {
-		return $this->getImage(random_int(1, $this->size()));
+	public function getRandomImage(string $category = null) : Image {
+		if ($category != null){
+			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category');
+			$s->execute(array("category" => $category));
+			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
+			
+			return $this->getImage($ids[random_int(0, count($ids) - 1)]);
+		}else{
+			return $this->getImage(random_int(1, $this->size()));
+		}
 	}
 
 	/**
 	 * Retourne l'objet de la premiere image
 	 * 
+	 * @param string $category La catégorie de l'image à afficher
+	 * 
 	 * @return Image
 	 */
-	public function getFirstImage() : Image {
-		return $this->getImage(1);
+	public function getFirstImage(string $category = null) : Image {
+		if ($category != null){
+			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category LIMIT 1');
+			$s->execute(array("category" => $category));
+
+			return $this->getImage($s->fetch(PDO::FETCH_COLUMN));
+		}else{
+			return $this->getImage(1);
+		}
 	}
 
 	/**
 	 * Retourne l'image suivante d'une image
 	 * 
 	 * @param Image $img
+	 * @param string $category La categorie des images à afficher
 	 * 
 	 * @return Image
 	 */
-	public function getNextImage(Image $img) : Image {
+	public function getNextImage(Image $img, string $category = null) : Image {
 		$id = $img->getId();
-		if ($id < $this->size()) {
-			$img = $this->getImage($id+1);
+		if ($category != null){
+			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category AND id > :id LIMIT 1');
+			$s->execute(array("id" => $id, "category" => $category));
+						
+			$resultId = $s->fetch(PDO::FETCH_COLUMN);
+			if ($resultId != null){
+				$id = $resultId;
+			}
+		}else{
+			if ($id < $this->size()) {
+				$id += 1;
+			}
 		}
-		return $img;
+		
+		return $this->getImage($id);
 	}
 
 	/**
 	 * Retourne l'image précédente d'une image
 	 * 
 	 * @param Image $img
+	 * @param string $category La categorie des images à afficher
 	 * 
 	 * @return \Image
 	 */
-	public function getPrevImage(Image $img) : Image {
+	public function getPrevImage(Image $img, string $category = null) : Image {
 		$id = $img->getId();
-		if ($id > 1) {
-			$img = $this->getImage($id-1);
+		if ($category != null){
+			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category AND id < :id ORDER BY id DESC LIMIT 1');
+			$s->execute(array("id" => $id, "category" => $category));
+			$resultId = $s->fetch(PDO::FETCH_COLUMN);
+			if ($resultId != null){
+				$id = $resultId;
+			}
+		}else{
+			if ($id > 1) {
+				$id -= 1;
+			}
 		}
-		return $img;
+
+		return $this->getImage($id);
 	}
 
 	/**
@@ -114,20 +156,36 @@ class ImageDAO {
 	 * 
 	 * @param Image $img
 	 * @param int $nb
+	 * @param string $category La categorie des images à afficher
 	 * 
 	 * @return Image
 	 */
-	public function jumpToImage(Image $img, int $nb) : Image {
+	public function jumpToImage(Image $img, int $nb, string $category = null) : Image {
 		$id = $img->getId();
-		$newId = $id + $nb;
+		if ($category != null){
+			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category LIMIT 1');
+			$s->execute(array("category" => $category));
+			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
+			
+			$newPos = array_search($id, $ids) + $nb;
+			
+			if ($newPos < 0){
+				$newPos = 0;
+			}else if ($newPos >= count($ids)){
+				$newPos = count($ids) - 1;
+			}
+			$id = $ids[$newPos];
+		}else{
+			$id += $nb;
 
-		if ($newId < 1){
-			$newId = 1;
-		}else if ($newId >= $this->size()){
-			$newId = $this->size();
+			if ($id < 1){
+				$id = 1;
+			}else if ($id >= $this->size()){
+				$id = $this->size();
+			}
 		}
-
-		return $this->getImage($newId);
+		
+		return $this->getImage($id);
 	}
 
 	/**
@@ -135,22 +193,49 @@ class ImageDAO {
 	 * 
 	 * @param image $img
 	 * @param int $nb
+	 * @param string $category La categorie des images à afficher
 	 * 
 	 * @return array
 	 */
-	function getImageList(image $img, int $nb) : array {
+	public function getImageList(image $img, int $nb, string $category = null) : array {
 		# Verifie que le nombre d'image est non nul
 		if (!$nb > 0) {
 			debug_print_backtrace();
 			trigger_error("Erreur dans ImageDAO.getImageList: nombre d'images nul");
 		}
+		
 		$id = $img->getId();
-		$max = $id+$nb;
-		while ($id < $this->size() && $id < $max) {
-			$res[] = $this->getImage($id);
-			$id++;
+		$res = [];
+		
+		if ($category != null){
+			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category LIMIT 1');
+			$s->execute(array("category" => $category));
+			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
+			
+			for ($i = 0 ; $i < $nb && $i < count($ids) - 1 ; $i++) {
+				$res[] = $this->getImage($ids[$i]);
+			}
+		}else{
+			$max = $id + $nb;
+			while ($id < $this->size() && $id < $max) {
+				$res[] = $this->getImage($id);
+				$id++;
+			}
 		}
+		
 		return $res;
+	}
+	
+	/**
+	 * Retourne la liste des catégories disponiblent
+	 * 
+	 * @return array
+	 */
+	public function getCategorieList() : array{
+		$s = $this->db->prepare('SELECT DISTINCT category FROM image ORDER BY category');
+		$s->execute();
+
+		return $s->fetchAll(PDO::FETCH_COLUMN);
 	}
 }
 

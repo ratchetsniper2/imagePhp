@@ -3,6 +3,7 @@
 <head>
 	<title>Site SIL3</title>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
 	<link rel="stylesheet" href="view/lib/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="view/lib/font-awesome/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="view/style.css" media="screen" title="Normal" />
