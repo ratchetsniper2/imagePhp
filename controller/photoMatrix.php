@@ -112,4 +112,54 @@ class PhotoMatrix {
 		require_once("view/mainView.php");
 	}
 
+	public function nextAction() {
+		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
+			$imgId = $_GET["imgId"];
+			$imgTemp = $this->imgDAO->getImage($imgId);
+			$img = $this->imgDAO->getNextImage($imgTemp);
+		} else {
+			// Pas d'image, se positionne sur la première
+			$img = $this->imgDAO->getFirstImage();
+		}
+
+		if (isset($_GET["nbImg"]) && is_numeric($_GET["nbImg"])) {
+			$nbImg = $_GET["nbImg"];
+		} else {
+			$nbImg = 2;
+		}
+
+		$imgs = $this->imgDAO->getImageList($img, $nbImg);
+
+
+		$data = $this->getData($imgs, $nbImg);
+		$data["view"] = "photoMatrixView.php";
+
+		require_once("view/mainView.php");
+	}
+
+	public function prevAction() {
+		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
+			$imgId = $_GET["imgId"];
+			$imgTemp = $this->imgDAO->getImage($imgId);
+			$img = $this->imgDAO->getPrevImage($imgTemp);
+		} else {
+			// Pas d'image, se positionne sur la première
+			$img = $this->imgDAO->getFirstImage();
+		}
+
+		if (isset($_GET["nbImg"]) && is_numeric($_GET["nbImg"])) {
+			$nbImg = $_GET["nbImg"];
+		} else {
+			$nbImg = 2;
+		}
+
+		$imgs = $this->imgDAO->getImageList($img, $nbImg);
+
+
+		$data = $this->getData($imgs, $nbImg);
+		$data["view"] = "photoMatrixView.php";
+
+		require_once("view/mainView.php");
+	}
+
 }
