@@ -163,7 +163,7 @@ class ImageDAO {
 	public function jumpToImage(Image $img, int $nb, string $category = null) : Image {
 		$id = $img->getId();
 		if ($category != null){
-			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category LIMIT 1');
+			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category');
 			$s->execute(array("category" => $category));
 			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
 			
@@ -171,8 +171,8 @@ class ImageDAO {
 			
 			if ($newPos < 0){
 				$newPos = 0;
-			}else if ($newPos >= count($ids)){
-				$newPos = count($ids) - 1;
+			}else if (!key_exists($newPos, $ids)){
+				$newPos = array_search($id, $ids);
 			}
 			$id = $ids[$newPos];
 		}else{
@@ -208,11 +208,11 @@ class ImageDAO {
 		$res = [];
 		
 		if ($category != null){
-			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category LIMIT 1');
-			$s->execute(array("category" => $category));
+			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category AND id >= :id');
+			$s->execute(array("category" => $category, "id" => $id));
 			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
 			
-			for ($i = 0 ; $i < $nb && $i < count($ids) - 1 ; $i++) {
+			for ($i = 0 ; $i < $nb && $i < count($ids) ; $i++) {
 				$res[] = $this->getImage($ids[$i]);
 			}
 		}else{
