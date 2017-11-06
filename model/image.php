@@ -47,5 +47,12 @@ class Image {
 	public function getComment() : string {
 		return $this->comment;
 	}
+	
+	function setCategory($category) {
+		$this->category = $category;
+	}
 
+	function setComment($comment) {
+		$this->comment = $comment;
+	}
 }
