@@ -38,20 +38,54 @@ class Photo {
 		$data["imgComment"] = $img->getComment();
 		$data["imgCategory"] = $img->getCategory();
 		
+		// catégorie
+		$category = $this->getCategoryQuery();
+		$data["selectedCategory"] = $category;
+		$categories = $this->imgDAO->getCategorieList();
+		if ($category != null){
+			unset($categories[array_search($category, $categories)]);
+		}
+		$data["availableCategories"] = $categories;
+		
 		// menu
 		$imgId = $img->getId();
 		
+		$urlCategory = urlencode($category);
+		
 		$data["menu"]['Home'] = "index.php";
 		$data["menu"]['A propos'] = "index.php?controller=home&action=aproposAction";
-		$data["menu"]['First'] = "index.php?controller=photo&action=firstAction&size=$imgSize";
-		$data["menu"]['Random'] = "index.php?controller=photo&action=randomAction&size=$imgSize";
-		$data["menu"]['More'] = "index.php?controller=photoMatrix&imgId=$imgId";    
-		$data["menu"]['Zoom +'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=1.25";
-		$data["menu"]['Zoom -'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=0.75";
+		$data["menu"]['First'] = "index.php?controller=photo&action=firstAction&size=$imgSize&category=$urlCategory";
+		$data["menu"]['Random'] = "index.php?controller=photo&action=randomAction&size=$imgSize&category=$urlCategory";
+		$data["menu"]['More'] = "index.php?controller=photoMatrix&imgId=$imgId&category=$urlCategory";    
+		$data["menu"]['Zoom +'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=1.25&category=$urlCategory";
+		$data["menu"]['Zoom -'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=0.75&category=$urlCategory";
 
 		return $data;
 	}
-
+	
+	/**
+	 * Récupère la catégorie dans la query string
+	 * 
+	 * @return string La catégorie ou null
+	 */
+	private function getCategoryQuery() : string {
+		// Récupération des catégories disponibles
+		$categories = $this->imgDAO->getCategorieList();
+		
+		$category = "";
+		
+		if (isset($_GET["category"]) && in_array($_GET["category"], $categories)) {
+			// Si il y a une catégorie et qu'elle est valide
+			$category = $_GET["category"];
+		}
+		
+		return $category;
+	}
+	
+	// -------------------------------------------------------------------------
+	// Actions
+	// -------------------------------------------------------------------------
+	
 	/**
 	 * Action par defaut
 	 * Afficher la première image
@@ -63,8 +97,8 @@ class Photo {
 	/**
 	 * Afficher la première image
 	 */
-	public function firstAction(){
-		$img = $this->imgDAO->getFirstImage();
+	public function firstAction(){		
+		$img = $this->imgDAO->getFirstImage($this->getCategoryQuery());
 		$data = $this->getData($img);
 		
 		$data["view"] = "photoView.php";
@@ -75,14 +109,14 @@ class Photo {
 	/**
 	 * Afficher l'image suivante
 	 */
-	public function nextAction(){
+	public function nextAction(){		
 		// Récupération de l'image
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
 			$imgId = $_GET["imgId"];
-			$img = $this->imgDAO->getNextImage($this->imgDAO->getImage($imgId));
+			$img = $this->imgDAO->getNextImage($this->imgDAO->getImage($imgId), $this->getCategoryQuery());
 		} else {
 			// Pas d'image, se positionne sur la première
-			$img = $this->imgDAO->getFirstImage();
+			$img = $this->imgDAO->getFirstImage($this->getCategoryQuery());
 		}
 		
 		$data = $this->getData($img);
@@ -95,14 +129,14 @@ class Photo {
 	/**
 	 * Afficher l'image précédente
 	 */
-	public function prevAction(){
+	public function prevAction(){		
 		// Récupération de l'image
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
 			$imgId = $_GET["imgId"];
-			$img = $this->imgDAO->getPrevImage($this->imgDAO->getImage($imgId));
+			$img = $this->imgDAO->getPrevImage($this->imgDAO->getImage($imgId), $this->getCategoryQuery());
 		} else {
 			// Pas d'image, se positionne sur la première
-			$img = $this->imgDAO->getFirstImage();
+			$img = $this->imgDAO->getFirstImage($this->getCategoryQuery());
 		}
 		
 		$data = $this->getData($img);
@@ -116,7 +150,7 @@ class Photo {
 	 * Afficher une image aléatoire
 	 */
 	public function randomAction(){
-		$img = $this->imgDAO->getRandomImage();
+		$img = $this->imgDAO->getRandomImage($this->getCategoryQuery());
 		
 		$data = $this->getData($img);
 		
@@ -128,14 +162,14 @@ class Photo {
 	/**
 	 * Afficher l'image avec un zoom
 	 */
-	public function zoomAction(){
+	public function zoomAction(){		
 		// Récupération de l'image
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
 			$imgId = $_GET["imgId"];
 			$img = $this->imgDAO->getImage($imgId);
 		} else {
 			// Pas d'image, se positionne sur la première
-			$img = $this->imgDAO->getFirstImage();
+			$img = $this->imgDAO->getFirstImage($this->getCategoryQuery());
 		}
 		
 		// Récupération de la taille actuelle
@@ -155,6 +189,13 @@ class Photo {
 		$data["view"] = "photoView.php";
 
 		require_once("view/mainView.php");
+	}
+	
+	/**
+	 * Affiche la première image d'une catégorie
+	 */
+	public function categoryAction(){
+		$this->firstAction();
 	}
 	
 }

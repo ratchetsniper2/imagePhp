@@ -2,9 +2,13 @@ header {
   text-align: center;
 }
 
+#pied {
+    margin-top: 20px;
+    border: 1px dotted navy;
+    clear:left;
+}
 
-#pied {
-	margin-top: 20px;
-	border: 1px dotted navy;
-	clear:left;
-  }
+#categories .dropdown-menu{
+    max-height: 300px;
+    overflow-y: scroll;
+}
