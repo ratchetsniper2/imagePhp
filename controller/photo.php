@@ -59,7 +59,7 @@ class Photo {
 		$data["menu"]['More'] = "index.php?controller=photoMatrix&imgId=$imgId&nbImg=2&category=$urlCategory";    
 		$data["menu"]['Zoom +'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=1.25&category=$urlCategory";
 		$data["menu"]['Zoom -'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=0.75&category=$urlCategory";
-
+		$data["menu"]['Edit'] = "index.php?controller=photo&action=editAction&imgId=$imgId&size=$imgSize&category=$urlCategory";
 		return $data;
 	}
 
@@ -197,5 +197,88 @@ class Photo {
 	public function categoryAction(){
 		$this->firstAction();
 	}
+	
+	/**
+	 * Permet d'éditer la catégorie et le commentaire d'une image
+	 */
+	public function editAction(){
+		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
+			$imgId = $_GET["imgId"];
+			$img = $this->imgDAO->getImage($imgId);
+		} else {
+			// Pas d'image, se positionne sur la première
+			$img = $this->imgDAO->getFirstImage($this->getCategoryQuery());
+		}
+		
+		$imgId = $img->getId();
+		
+		$data = $this->getData($img);
+		$data["menu"] = [];
+		$data["menu"]['Save'] = "index.php?controller=photo&action=saveAction&imgId=$imgId&size=".$data["imgSize"]."&category=".urlencode($data["selectedCategory"]);
+		$data["menu"]['Cancel'] = "index.php?controller=photo&action=cancelAction&imgId=$imgId&size=".$data["imgSize"]."&category=".urlencode($data["selectedCategory"]);
+		
+		$data["view"] = "photoEditView.php";
 
+		require_once("view/mainView.php");
+	}
+	
+	/**
+	 * Revenir du mode édit à vue
+	 */
+	public function cancelAction(){
+		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
+			$imgId = $_GET["imgId"];
+			$img = $this->imgDAO->getImage($imgId);
+		} else {
+			// Pas d'image, se positionne sur la première
+			$this->firstAction();
+		}
+		
+		$data = $this->getData($img);
+
+		$data["view"] = "photoView.php";
+
+		require_once("view/mainView.php");
+	}
+	
+	/**
+	 * Sauvegarder les modifications
+	 */
+	public function saveAction(){
+		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
+			$imgId = $_GET["imgId"];
+			$img = $this->imgDAO->getImage($imgId);
+		} else {
+			// Pas d'image, se positionne sur la première
+			$this->firstAction();
+		}
+		
+		$comment = null;
+		if (isset($_POST["comment"])){
+			$comment = $_POST["comment"];
+		}
+		
+		$category = null;
+		if (isset($_POST["category"])){
+			$category = $_POST["category"];
+		}
+		
+		// Save category
+		if ($category != null && $category !== $img->getCategory()){
+			$img->setCategory($category);
+		}
+		
+		// Save comment
+		if ($comment != null && $comment !== $img->getComment()){
+			$img->setComment($comment);
+		}
+		
+		$this->imgDAO->saveImage($img);
+				
+		$data = $this->getData($img);
+
+		$data["view"] = "photoView.php";
+
+		require_once("view/mainView.php");
+	}
 }

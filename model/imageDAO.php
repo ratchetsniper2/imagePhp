@@ -198,7 +198,7 @@ class ImageDAO {
 	 *
 	 * @return array
 	 */
-	public function getImageList(image $img, int $nb, string $category = null) : array {
+	public function getImageList(Image $img, int $nb, string $category = null) : array {
 		# Verifie que le nombre d'image est non nul
 		if (!$nb > 0) {
 			debug_print_backtrace();
@@ -227,6 +227,26 @@ class ImageDAO {
 		return $res;
 	}
 
+	/**
+	 * Sauvegarde ou met à jour une image
+	 * 
+	 * @param Image $img
+	 */
+	public function saveImage(Image $img){
+		$s = $this->db->prepare('SELECT * FROM image WHERE id=:id');
+		$s->execute(array("id" => $img->getId()));
+
+		if ($s) {
+			// if image exist : update
+			$s = $this->db->prepare('UPDATE image SET path = :url, category = :category, comment = :comment WHERE id = :id');
+			$s->execute(array("url" => str_replace(self::URL_PATH."/", "", $img->getURL()), "category" => $img->getCategory(), "comment" => $img->getComment(), "id" => $img->getId()));
+		} else {
+			// else : insert
+			$s = $this->db->prepare('INSERT INTO image (id, path, category, comment) VALUES (:id, :url, :category, :comment)');
+			$s->execute(array("id" => $img->getId(), "url" => str_replace(self::URL_PATH."/", "", $img->getURL()), "category" => $img->getCategory(), "comment" => $img->getCategory()));
+		}
+	}
+	
 	/**
 	 * Retourne la liste des catégories disponiblent
 	 *
