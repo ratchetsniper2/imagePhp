@@ -5,12 +5,6 @@ require_once("model/imageDAO.php");
 
 class Photo {
 
-	// La taille par défaut des images
-	const DEFAULT_SIZE = 480;
-	
-	// Le type d'image accepté
-	const EXTENSIONS = array('jpg', 'jpeg', 'png');
-
 	private $imgDAO;
 
 	public function __construct(){
@@ -31,7 +25,7 @@ class Photo {
 			if (isset($_GET["size"]) && is_numeric($_GET["size"])) {
 				$imgSize = $_GET["size"];
 			} else {
-				$imgSize = self::DEFAULT_SIZE;
+				$imgSize = DEFAULT_SIZE;
 			}
 		}
 		$data["imgSize"] = $imgSize;
@@ -180,7 +174,7 @@ class Photo {
 		if (isset($_GET["size"]) && is_numeric($_GET["size"])) {
 			$imgSize = $_GET["size"];
 		} else {
-			$imgSize = self::DEFAULT_SIZE;
+			$imgSize = DEFAULT_SIZE;
 		}
 
 		// Transformation de la taille avec le zoom demandé
@@ -204,6 +198,7 @@ class Photo {
 	
 	/**
 	 * Permet d'éditer la catégorie et le commentaire d'une image
+	 * ou de creer une nouvelle image
 	 */
 	public function editAction(){
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
@@ -267,16 +262,16 @@ class Photo {
 				// si il n'y a pas eu d'erreur
 				
 					$extension_upload = strtolower(substr(strrchr($_FILES['image']['name'], '.'), 1));
-					if (in_array($extension_upload, self::EXTENSIONS)){
+					if (in_array($extension_upload, EXTENSIONS)){
 						// si le fichier est une image
 						
 						$projectRootPath = __DIR__."/../";
 
 						// création du dossier 'upload'
-						@mkdir($projectRootPath.ImageDAO::URL_PATH."/upload", 0777);
+						@mkdir($projectRootPath.URL_PATH."/upload", 0777);
 
 						$imgName = md5(uniqid(rand(), true));
-						$imgPath = ImageDAO::URL_PATH."/upload/".$imgName.".".$extension_upload;
+						$imgPath = URL_PATH."/upload/".$imgName.".".$extension_upload;
 						$resultat = move_uploaded_file($_FILES['image']['tmp_name'], $projectRootPath.$imgPath);
 						if ($resultat){
 							// si réussit
