@@ -7,6 +7,9 @@ class Photo {
 
 	// La taille par défaut des images
 	const DEFAULT_SIZE = 480;
+	
+	// Le type d'image accepté
+	const EXTENSIONS = array('jpg', 'jpeg', 'png');
 
 	private $imgDAO;
 
@@ -60,6 +63,7 @@ class Photo {
 		$data["menu"]['Zoom +'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=1.25&category=$urlCategory";
 		$data["menu"]['Zoom -'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=0.75&category=$urlCategory";
 		$data["menu"]['Edit'] = "index.php?controller=photo&action=editAction&imgId=$imgId&size=$imgSize&category=$urlCategory";
+		$data["menu"]['Add image'] = "index.php?controller=photo&action=editAction";
 		return $data;
 	}
 
@@ -205,17 +209,21 @@ class Photo {
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
 			$imgId = $_GET["imgId"];
 			$img = $this->imgDAO->getImage($imgId);
+			
+			$data = $this->getData($img);
+			
+			$data["menu"] = [];
+			$data["menu"]['Save'] = "index.php?controller=photo&action=saveAction&imgId=$imgId&size=".$data["imgSize"]."&category=".urlencode($data["selectedCategory"]);
+			$data["menu"]['Cancel'] = "index.php?controller=photo&action=cancelAction&imgId=$imgId&size=".$data["imgSize"]."&category=".urlencode($data["selectedCategory"]);
 		} else {
-			// Pas d'image, se positionne sur la première
-			$img = $this->imgDAO->getFirstImage($this->getCategoryQuery());
+			// Pas d'image, tout a vide (création d'image)
+			$data["imgUrl"] = "";
+			$data["imgComment"] = "";
+			$data["imgCategory"] = "";
+			
+			$data["menu"]['Save'] = "index.php?controller=photo&action=saveAction";
+			$data["menu"]['Cancel'] = "index.php?controller=photo&action=cancelAction";
 		}
-		
-		$imgId = $img->getId();
-		
-		$data = $this->getData($img);
-		$data["menu"] = [];
-		$data["menu"]['Save'] = "index.php?controller=photo&action=saveAction&imgId=$imgId&size=".$data["imgSize"]."&category=".urlencode($data["selectedCategory"]);
-		$data["menu"]['Cancel'] = "index.php?controller=photo&action=cancelAction&imgId=$imgId&size=".$data["imgSize"]."&category=".urlencode($data["selectedCategory"]);
 		
 		$data["view"] = "photoEditView.php";
 
@@ -231,7 +239,7 @@ class Photo {
 			$img = $this->imgDAO->getImage($imgId);
 		} else {
 			// Pas d'image, se positionne sur la première
-			$this->firstAction();
+			$img = $this->imgDAO->getFirstImage($this->getCategoryQuery());
 		}
 		
 		$data = $this->getData($img);
@@ -242,35 +250,68 @@ class Photo {
 	}
 	
 	/**
-	 * Sauvegarder les modifications
+	 * Sauvegarder les modifications ou crée une nouvelle image
 	 */
 	public function saveAction(){
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
 			$imgId = $_GET["imgId"];
 			$img = $this->imgDAO->getImage($imgId);
 		} else {
-			// Pas d'image, se positionne sur la première
-			$this->firstAction();
-		}
-		
-		$comment = null;
-		if (isset($_POST["comment"])){
-			$comment = $_POST["comment"];
-		}
-		
-		$category = null;
-		if (isset($_POST["category"])){
-			$category = $_POST["category"];
+			// Pas d'image, en créer une
+			
+			$error = null;						
+			if (isset($_FILES['image'])){
+				// si une image a été uploadé
+				
+				if (!$_FILES['image']['error'] > 0){
+				// si il n'y a pas eu d'erreur
+				
+					$extension_upload = strtolower(substr(strrchr($_FILES['image']['name'], '.'), 1));
+					if (in_array($extension_upload, self::EXTENSIONS)){
+						// si le fichier est une image
+						
+						$projectRootPath = __DIR__."/../";
+
+						// création du dossier 'upload'
+						@mkdir($projectRootPath.ImageDAO::URL_PATH."/upload", 0777);
+
+						$imgName = md5(uniqid(rand(), true));
+						$imgPath = ImageDAO::URL_PATH."/upload/".$imgName.".".$extension_upload;
+						$resultat = move_uploaded_file($_FILES['image']['tmp_name'], $projectRootPath.$imgPath);
+						if ($resultat){
+							// si réussit
+
+							// récupération du nouveau id
+							$id = $this->imgDAO->size() + 1;
+
+							$img = new Image($imgPath, $id, "", "");
+						}else{
+							$error = "La fonction move_uploaded_file a échoué (problème de droit ?)";
+						}
+					}else{
+						$error = "L'éxtension du fichier n'est pas valide.";
+					}
+				}else{
+					$error = "Erreur php (UPLOAD_ERR) : ".$_FILES['image']['error'];
+				}
+			}else{
+				$error = "Une image doit être séléctionné !";
+			}
+			
+			if ($error !== null){
+				// si erreur
+				die("<b>### Erreur : La création de l'image a échoué : </b>$error");
+			}
 		}
 		
 		// Save category
-		if ($category != null && $category !== $img->getCategory()){
-			$img->setCategory($category);
+		if (isset($_POST["category"]) && $_POST["category"] !== $img->getCategory()){
+			$img->setCategory($_POST["category"]);
 		}
 		
 		// Save comment
-		if ($comment != null && $comment !== $img->getComment()){
-			$img->setComment($comment);
+		if (isset($_POST["comment"]) && $_POST["comment"] !== $img->getComment()){
+			$img->setComment($_POST["comment"]);
 		}
 		
 		$this->imgDAO->saveImage($img);

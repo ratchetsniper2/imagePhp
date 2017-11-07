@@ -14,7 +14,7 @@ class ImageDAO {
 			$serverName = 'localhost'; // host name
 			$dbName = 'image'; // bdd name
 			$user = 'root'; // utilisateur
-			$pass = 'root'; // mot de passe
+			$pass = ''; // mot de passe
 
 			$this->db = new PDO("mysql:host=$serverName;dbname=$dbName", $user, $pass);
 			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -233,10 +233,9 @@ class ImageDAO {
 	 * @param Image $img
 	 */
 	public function saveImage(Image $img){
-		$s = $this->db->prepare('SELECT * FROM image WHERE id=:id');
-		$s->execute(array("id" => $img->getId()));
-
-		if ($s) {
+		$imgId = $img->getId();
+		
+		if($imgId >= 1 and $imgId <= $this->size()) {
 			// if image exist : update
 			$s = $this->db->prepare('UPDATE image SET path = :url, category = :category, comment = :comment WHERE id = :id');
 			$s->execute(array("url" => str_replace(self::URL_PATH."/", "", $img->getURL()), "category" => $img->getCategory(), "comment" => $img->getComment(), "id" => $img->getId()));
