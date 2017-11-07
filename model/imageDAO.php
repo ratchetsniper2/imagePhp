@@ -14,7 +14,7 @@ class ImageDAO {
 			$serverName = 'localhost'; // host name
 			$dbName = 'image'; // bdd name
 			$user = 'root'; // utilisateur
-			$pass = ''; // mot de passe
+			$pass = 'root'; // mot de passe
 
 			$this->db = new PDO("mysql:host=$serverName;dbname=$dbName", $user, $pass);
 			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -72,7 +72,7 @@ class ImageDAO {
 		if ($category != null){
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category');
 			$s->execute(array("category" => $category));
-			$ids = $s->fetchAll(PDO::FETCH_ASSOC);
+			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
 
 			return $this->getImage($ids[random_int(0, count($ids) - 1)]);
 		}else{
@@ -92,7 +92,7 @@ class ImageDAO {
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category LIMIT 1');
 			$s->execute(array("category" => $category));
 
-			return $this->getImage($s->fetch(PDO::FETCH_ASSOC));
+			return $this->getImage($s->fetch(PDO::FETCH_COLUMN));
 		}else{
 			return $this->getImage(1);
 		}
@@ -112,7 +112,7 @@ class ImageDAO {
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category AND id > :id LIMIT 1');
 			$s->execute(array("id" => $id, "category" => $category));
 
-			$resultId = $s->fetch(PDO::FETCH_ASSOC);
+			$resultId = $s->fetch(PDO::FETCH_COLUMN);
 			if ($resultId != null){
 				$id = $resultId;
 			}
@@ -138,7 +138,7 @@ class ImageDAO {
 		if ($category != null){
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category AND id < :id ORDER BY id DESC LIMIT 1');
 			$s->execute(array("id" => $id, "category" => $category));
-			$resultId = $s->fetch(PDO::FETCH_ASSOC);
+			$resultId = $s->fetch(PDO::FETCH_COLUMN);
 			if ($resultId != null){
 				$id = $resultId;
 			}
@@ -166,7 +166,7 @@ class ImageDAO {
 		if ($category != null){
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category');
 			$s->execute(array("category" => $category));
-			$ids = $s->fetchAll(PDO::FETCH_ASSOC);
+			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
 
 			$newPos = array_search($id, $ids) + $nb;
 
@@ -211,7 +211,7 @@ class ImageDAO {
 		if ($category != null){
 			$s = $this->db->prepare('SELECT id FROM image WHERE category = :category AND id >= :id');
 			$s->execute(array("category" => $category, "id" => $id));
-			$ids = $s->fetchAll(PDO::FETCH_ASSOC);
+			$ids = $s->fetchAll(PDO::FETCH_COLUMN);
 
 			for ($i = 0 ; $i < $nb && $i < count($ids) ; $i++) {
 				$res[] = $this->getImage($ids[$i]);
@@ -234,7 +234,7 @@ class ImageDAO {
 	 */
 	public function saveImage(Image $img){
 		$imgId = $img->getId();
-		
+
 		if($imgId >= 1 and $imgId <= $this->size()) {
 			// if image exist : update
 			$s = $this->db->prepare('UPDATE image SET path = :url, category = :category, comment = :comment WHERE id = :id');
