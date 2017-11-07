@@ -12,3 +12,7 @@ header {
     max-height: 300px;
     overflow-y: scroll;
 }
+
+.center {
+  text-align: center;
+}
