@@ -292,7 +292,23 @@ class Photo {
 						$error = "L'éxtension du fichier n'est pas valide.";
 					}
 				}else{
-					$error = "Erreur php (UPLOAD_ERR) : ".$_FILES['image']['error'];
+					$errorName = "";
+					switch ($_FILES['image']['error']){
+						case UPLOAD_ERR_NO_FILE:
+							$errorName = "Fichier manquant.";
+							break;
+						case UPLOAD_ERR_INI_SIZE:
+							$errorName = "Fichier dépassant la taille maximale autorisée par PHP.";
+							break;
+						case UPLOAD_ERR_FORM_SIZE:
+							$errorName = "Fichier dépassant la taille maximale autorisée par le formulaire.";
+							break;
+						case UPLOAD_ERR_PARTIAL:
+							$errorName = "Fichier transféré partiellement.";
+							break;
+					}
+					
+					$error = "Erreur php : ".$errorName;
 				}
 			}else{
 				$error = "Une image doit être séléctionné !";
