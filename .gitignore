@@ -2,3 +2,4 @@
 model/IMG
 editeur
 \.atomignore
+config.php

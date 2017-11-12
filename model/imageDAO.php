@@ -4,19 +4,11 @@ require_once("image.php");
 
 class ImageDAO {
 
-	// Chemin où se trouvent les images (par rapport à index.php)
-	const URL_PATH = "model/IMG";
-
 	private $db;
 
 	public function __construct() {
 		try {
-			$serverName = 'localhost'; // host name
-			$dbName = 'image'; // bdd name
-			$user = 'root'; // utilisateur
-			$pass = 'root'; // mot de passe
-
-			$this->db = new PDO("mysql:host=$serverName;dbname=$dbName", $user, $pass);
+			$this->db = new PDO("mysql:host=".SERVER_NAME.";dbname=".DATABASE_NAME, USERNAME, USER_PASSWORD);
 			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		} catch (PDOException $e) {
 			die ("Erreur : ".$e->getMessage());
@@ -58,7 +50,7 @@ class ImageDAO {
 			print $err[2]."<br/>";
 		}
 
-		return new Image(self::URL_PATH."/".$img["path"], $imgId, $img["category"], $img["comment"]);
+		return new Image(URL_PATH."/".$img["path"], $imgId, $img["category"], $img["comment"]);
 	}
 
 	/**
@@ -238,11 +230,11 @@ class ImageDAO {
 		if($imgId >= 1 and $imgId <= $this->size()) {
 			// if image exist : update
 			$s = $this->db->prepare('UPDATE image SET path = :url, category = :category, comment = :comment WHERE id = :id');
-			$s->execute(array("url" => str_replace(self::URL_PATH."/", "", $img->getURL()), "category" => $img->getCategory(), "comment" => $img->getComment(), "id" => $img->getId()));
+			$s->execute(array("url" => str_replace(URL_PATH."/", "", $img->getURL()), "category" => $img->getCategory(), "comment" => $img->getComment(), "id" => $img->getId()));
 		} else {
 			// else : insert
 			$s = $this->db->prepare('INSERT INTO image (id, path, category, comment) VALUES (:id, :url, :category, :comment)');
-			$s->execute(array("id" => $img->getId(), "url" => str_replace(self::URL_PATH."/", "", $img->getURL()), "category" => $img->getCategory(), "comment" => $img->getCategory()));
+			$s->execute(array("id" => $img->getId(), "url" => str_replace(URL_PATH."/", "", $img->getURL()), "category" => $img->getCategory(), "comment" => $img->getCategory()));
 		}
 	}
 
