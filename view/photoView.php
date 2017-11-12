@@ -33,8 +33,9 @@
 	<script type="text/javascript">
 	$(function() {
 		console.log($('.like').prop('id'));
-		if ($.cookie('likedImg') != undefined) {
-			if ($.inArray($('.like').attr('id'),$.cookie('like'))) {
+		var id = $('.like').prop('id');
+		if ($.cookie(id) != undefined) {
+			if ($.cookie(id) == id) {
 				//déja like
 				$('.like').prop("disabled", true);
 			} else {
@@ -46,24 +47,19 @@
 	});
 
 	function likeImg(elem, id) {
-		$.post( "controller/ajax.like.php",
-		{data: id},
-		function(data) {
-			if (data == 0) {
-				console.log(data);
-				if ($.cookie('likedImg') != undefined) {
-					$.cookie('likedImg', [id], { expires: 365});
-				} else {
-					$.cookie('likedImg', $.cookie('likedImg').push(id), {expires: 365});
-				}
-				$(elem).prop("disabled", true);
+			console.log(elem);
+			if ($.cookie(id) != undefined) {
+				$.cookie(id, id, { expires: 365});
 			} else {
-				console.log(data);
-				console.log('Erreur Ajax');
+				$.cookie(id, id, {expires: 365});
 			}
-
-		});
+			if ($.cookie(id) == id) {
+				$(elem).prop("disabled", true);
+			}
+			console.log(elem);
+			window.location.href = "index.php?controller=photo&action=likeAction&imgId=<?= $data["imgId"] ?>";
 	}
+
 	</script>
 
 </div>

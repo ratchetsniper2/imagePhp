@@ -7,7 +7,7 @@ class Photo {
 
 	// La taille par défaut des images
 	const DEFAULT_SIZE = 480;
-	
+
 	// Le type d'image accepté
 	const EXTENSIONS = array('jpg', 'jpeg', 'png');
 
@@ -18,13 +18,13 @@ class Photo {
 	}
 
 	/**
-	 * Crée les données pour les vue (menu / information sur l'image)
-	 *
-	 * @param Image $img L'image à afficher
-	 * @param int $imgSize La taille de l'image à afficher
-	 *
-	 * @return array
-	 */
+	* Crée les données pour les vue (menu / information sur l'image)
+	*
+	* @param Image $img L'image à afficher
+	* @param int $imgSize La taille de l'image à afficher
+	*
+	* @return array
+	*/
 	private function getData(Image $img, int $imgSize = null) : array{
 		if ($imgSize == null){
 			// Si il n'y a pas de taille demandé, on garde la meme taille ou celle par defaut
@@ -59,7 +59,7 @@ class Photo {
 		$data["menu"]['A propos'] = "index.php?controller=home&action=aproposAction";
 		$data["menu"]['First'] = "index.php?controller=photo&action=firstAction&size=$imgSize&category=$urlCategory";
 		$data["menu"]['Random'] = "index.php?controller=photo&action=randomAction&size=$imgSize&category=$urlCategory";
-		$data["menu"]['More'] = "index.php?controller=photoMatrix&imgId=$imgId&nbImg=2&category=$urlCategory";    
+		$data["menu"]['More'] = "index.php?controller=photoMatrix&imgId=$imgId&nbImg=2&category=$urlCategory";
 		$data["menu"]['Zoom +'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=1.25&category=$urlCategory";
 		$data["menu"]['Zoom -'] = "index.php?controller=photo&action=zoomAction&imgId=$imgId&size=$imgSize&zoom=0.75&category=$urlCategory";
 		$data["menu"]['Edit'] = "index.php?controller=photo&action=editAction&imgId=$imgId&size=$imgSize&category=$urlCategory";
@@ -68,10 +68,10 @@ class Photo {
 	}
 
 	/**
-	 * Récupère la catégorie dans la query string
-	 *
-	 * @return string La catégorie ou null
-	 */
+	* Récupère la catégorie dans la query string
+	*
+	* @return string La catégorie ou null
+	*/
 	private function getCategoryQuery() : string {
 		// Récupération des catégories disponibles
 		$categories = $this->imgDAO->getCategorieList();
@@ -91,16 +91,16 @@ class Photo {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Action par defaut
-	 * Afficher la première image
-	 */
+	* Action par defaut
+	* Afficher la première image
+	*/
 	public function indexAction(){
 		$this->firstAction();
 	}
 
 	/**
-	 * Afficher la première image
-	 */
+	* Afficher la première image
+	*/
 	public function firstAction(){
 		$img = $this->imgDAO->getFirstImage($this->getCategoryQuery());
 		$data = $this->getData($img);
@@ -111,8 +111,8 @@ class Photo {
 	}
 
 	/**
-	 * Afficher l'image suivante
-	 */
+	* Afficher l'image suivante
+	*/
 	public function nextAction(){
 		// Récupération de l'image
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
@@ -131,8 +131,8 @@ class Photo {
 	}
 
 	/**
-	 * Afficher l'image précédente
-	 */
+	* Afficher l'image précédente
+	*/
 	public function prevAction(){
 		// Récupération de l'image
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
@@ -151,8 +151,8 @@ class Photo {
 	}
 
 	/**
-	 * Afficher une image aléatoire
-	 */
+	* Afficher une image aléatoire
+	*/
 	public function randomAction(){
 		$img = $this->imgDAO->getRandomImage($this->getCategoryQuery());
 
@@ -164,8 +164,8 @@ class Photo {
 	}
 
 	/**
-	 * Afficher l'image avec un zoom
-	 */
+	* Afficher l'image avec un zoom
+	*/
 	public function zoomAction(){
 		// Récupération de l'image
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
@@ -196,22 +196,22 @@ class Photo {
 	}
 
 	/**
-	 * Affiche la première image d'une catégorie
-	 */
+	* Affiche la première image d'une catégorie
+	*/
 	public function categoryAction(){
 		$this->firstAction();
 	}
-	
+
 	/**
-	 * Permet d'éditer la catégorie et le commentaire d'une image
-	 */
+	* Permet d'éditer la catégorie et le commentaire d'une image
+	*/
 	public function editAction(){
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
 			$imgId = $_GET["imgId"];
 			$img = $this->imgDAO->getImage($imgId);
-			
+
 			$data = $this->getData($img);
-			
+
 			$data["menu"] = [];
 			$data["menu"]['Save'] = "index.php?controller=photo&action=saveAction&imgId=$imgId&size=".$data["imgSize"]."&category=".urlencode($data["selectedCategory"]);
 			$data["menu"]['Cancel'] = "index.php?controller=photo&action=cancelAction&imgId=$imgId&size=".$data["imgSize"]."&category=".urlencode($data["selectedCategory"]);
@@ -220,19 +220,19 @@ class Photo {
 			$data["imgUrl"] = "";
 			$data["imgComment"] = "";
 			$data["imgCategory"] = "";
-			
+
 			$data["menu"]['Save'] = "index.php?controller=photo&action=saveAction";
 			$data["menu"]['Cancel'] = "index.php?controller=photo&action=cancelAction";
 		}
-		
+
 		$data["view"] = "photoEditView.php";
 
 		require_once("view/mainView.php");
 	}
-	
+
 	/**
-	 * Revenir du mode édit à vue
-	 */
+	* Revenir du mode édit à vue
+	*/
 	public function cancelAction(){
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
 			$imgId = $_GET["imgId"];
@@ -241,35 +241,35 @@ class Photo {
 			// Pas d'image, se positionne sur la première
 			$img = $this->imgDAO->getFirstImage($this->getCategoryQuery());
 		}
-		
+
 		$data = $this->getData($img);
 
 		$data["view"] = "photoView.php";
 
 		require_once("view/mainView.php");
 	}
-	
+
 	/**
-	 * Sauvegarder les modifications ou crée une nouvelle image
-	 */
+	* Sauvegarder les modifications ou crée une nouvelle image
+	*/
 	public function saveAction(){
 		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
 			$imgId = $_GET["imgId"];
 			$img = $this->imgDAO->getImage($imgId);
 		} else {
 			// Pas d'image, en créer une
-			
-			$error = null;						
+
+			$error = null;
 			if (isset($_FILES['image'])){
 				// si une image a été uploadé
-				
+
 				if (!$_FILES['image']['error'] > 0){
-				// si il n'y a pas eu d'erreur
-				
+					// si il n'y a pas eu d'erreur
+
 					$extension_upload = strtolower(substr(strrchr($_FILES['image']['name'], '.'), 1));
 					if (in_array($extension_upload, self::EXTENSIONS)){
 						// si le fichier est une image
-						
+
 						$projectRootPath = __DIR__."/../";
 
 						// création du dossier 'upload'
@@ -295,47 +295,61 @@ class Photo {
 					$errorName = "";
 					switch ($_FILES['image']['error']){
 						case UPLOAD_ERR_NO_FILE:
-							$errorName = "Fichier manquant.";
-							break;
+						$errorName = "Fichier manquant.";
+						break;
 						case UPLOAD_ERR_INI_SIZE:
-							$errorName = "Fichier dépassant la taille maximale autorisée par PHP.";
-							break;
+						$errorName = "Fichier dépassant la taille maximale autorisée par PHP.";
+						break;
 						case UPLOAD_ERR_FORM_SIZE:
-							$errorName = "Fichier dépassant la taille maximale autorisée par le formulaire.";
-							break;
+						$errorName = "Fichier dépassant la taille maximale autorisée par le formulaire.";
+						break;
 						case UPLOAD_ERR_PARTIAL:
-							$errorName = "Fichier transféré partiellement.";
-							break;
+						$errorName = "Fichier transféré partiellement.";
+						break;
 					}
-					
+
 					$error = "Erreur php : ".$errorName;
 				}
 			}else{
 				$error = "Une image doit être séléctionné !";
 			}
-			
+
 			if ($error !== null){
 				// si erreur
 				die("<b>### Erreur : La création de l'image a échoué : </b>$error");
 			}
 		}
-		
+
 		// Save category
 		if (isset($_POST["category"]) && $_POST["category"] !== $img->getCategory()){
 			$img->setCategory($_POST["category"]);
 		}
-		
+
 		// Save comment
 		if (isset($_POST["comment"]) && $_POST["comment"] !== $img->getComment()){
 			$img->setComment($_POST["comment"]);
 		}
-		
+
 		$this->imgDAO->saveImage($img);
-				
+
 		$data = $this->getData($img);
 
 		$data["view"] = "photoView.php";
 
 		require_once("view/mainView.php");
+	}
+
+
+	/**
+	* Permet d'enregistrer un j'aime
+	*/
+	public function likeAction(){
+		if (isset($_GET["imgId"]) && is_numeric($_GET["imgId"])) {
+			$img = $this->imgDAO->getImage($_GET["imgId"]);
+			$data = $this->getData($img);
+			$data["view"] = "photoView.php";
+
+			require_once("view/mainView.php");
+		}
 	}
 }
